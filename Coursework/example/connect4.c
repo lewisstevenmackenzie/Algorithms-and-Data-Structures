@@ -30,20 +30,7 @@ void High_Score();      //FUNCTION TO DETERMINE THE HIGH SCORE
 void select_side();     //FUNCTION TO SWAPE SELECT SIDES
 void XML();             //FUNCTION TO READ FROM XML FILE
 void instrctions();     //FUNCTIONS TO PRINT THE INSTRUCTIONS OF THE GAME
-int main(){
-    int flag=1;
-    XML();              //FUNCTION TO READ FROM XML FILE
-    findposition();     //FUNCTION TO GET THE POSITION OF ELEMENT
-    start();            //FUNCTION FOR MAIN MENU
-    score_o=0;score_x=0;b=0;                //NEW INTIALIZATION FOR NEW GAME
-    while(flag==1){                         //FLAG TO START A NEW GAME
-    printf("\nDo you want to go to main menue yes/no?");
-    scanf("%s",&check);
-    if(strcmp(check,yes)==0)start();        //ASKING FOR CONTINUE
-    else flag=0;
-    }
-    return 0;
-}
+
 //FUNCTION TO STARTING THE MAIN MENU
 void start(){
     XML();
@@ -76,6 +63,7 @@ void start(){
         default: printf("error please try again !!");
     }
 }
+
 void instrctions(){
     system("cls");                                       //PRINTING A NEW SCREEN
     system("COLOR 1C");
@@ -679,4 +667,20 @@ void select_side(){
         select_sides=1;
     }
 }
+
+int main(){
+    int flag=1;
+    XML();              //FUNCTION TO READ FROM XML FILE
+    findposition();     //FUNCTION TO GET THE POSITION OF ELEMENT
+    start();            //FUNCTION FOR MAIN MENU
+    score_o=0;score_x=0;b=0;                //NEW INTIALIZATION FOR NEW GAME
+    while(flag==1){                         //FLAG TO START A NEW GAME
+    printf("\nDo you want to go to main menue yes/no?");
+    scanf("%s",&check);
+    if(strcmp(check,yes)==0)start();        //ASKING FOR CONTINUE
+    else flag=0;
+    }
+    return 0;
+}
+
 //END OF PROJECT !!
