@@ -1,0 +1,36 @@
+Main Menu Page.
+    case statements 
+        play
+        instructions
+        highscore
+        edit game board?
+
+Game Page:
+    use of stacks to record player moves.
+    once a game is over the moves will be stored in an array and added to the history page.
+
+History Page:
+    will have a list of games played and say who won.
+    the player can then choose one to review.
+    previous games will be stored in an array.
+    a struct will be used for each game.
+    information = date played, score, array(moves played) 
+
+
+Instructions Page:
+    simple text explaining the rules.
+    player can make a moves
+    they can undo a move all the way back to the beginning
+
+
+
+Game Board:
+Style 1:
+    _________
+    | | | | | |
+    | | | | | |
+    |x| | | | |
+    |O|x| | | |
+    |O|O|x|O|O|
+    |O|O|O|x|O|
+     1 2 3 4 5
