@@ -31,6 +31,7 @@ void printBoard();
 void takeTurn();
 void pushOrder();
 void findPosition();
+void replayGame(game curGame);
 
 int num_cols = 5;
 int num_rows = 7;
@@ -92,34 +93,73 @@ game start(){
     int pos = 0;
     game currentGame={"",NULL,0};
 
+    char input[10];
     int column;
     int turn = 0;
-    int win = 0;
-
-
-    printf("\ndebug: turn: %d\n", turn);
-    Sleep(4000);
+    int flag2 = 0;
+    int win;
 
     printf("\n      ***Welcome to Connect 4***");
 
     printBoard(board);
 
     for(int i = 0; i < num_cols*num_rows;i++ ){
-        printf("Which column would you like to play in?");
+        //pushOrder(column);
 
-        scanf("%d", &column);
+        if (turn%2 == 0){
+            while (flag2 == 0){
 
-        pushOrder(column);
-        
-        printf("\nDEBUG\n");
+                printf("\nPlayer1: Which column would you like to play in? (1-5)");
 
+                scanf("%s", &input);
+                column=atoi(input);
+
+                if(strcmp(input,"undo") == 0){
+                    //carry out the undo function
+                    flag2=1;
+                }
+                else if (strcmp(input,"redo") == 0){
+                    // carry out the redo function
+                    flag2=1;
+                }
+                else if(column>num_cols || column < 0) {
+                    flag2=1;
+                }
+                else {
+                    printf("\nPlease enter a valid input:");
+                }
+            }
+            flag2 = 0;
+            board [position[column-1]][column-1] ='X';
+        }
+        else{
+            while (flag2 == 0){
+
+                printf("\nPlayer2: Which column would you like to play in? (1-5)");
+
+                scanf("%s", &input);
+                column=atoi(input);
+
+                if(strcmp(input,"undo") == 0){
+                    //carry out the undo function
+                    flag2=1;
+                }
+                else if (strcmp(input,"redo") == 0){
+                    // carry out the redo function
+                    flag2=1;
+                }
+                else if(column>num_cols || column < 0) {
+                    flag2=1;
+                }
+                else {
+                    printf("\nPlease enter a valid input:");
+                }
+            }
+            flag2 = 0;
+            board [position[column-1]][column-1] ='O';
+        }
         order[pos] = column;
         pos++;
-
-        if (turn%2 == 0)
-            board [position[column-1]][column-1] ='X';
-        else
-            board [position[column-1]][column-1] ='O';
 
         turn++;
         position[column-1] +=1;
@@ -156,8 +196,7 @@ game start(){
             return currentGame;
         }           
     }
-    if (win != 1) 
-        printf("You ran out of moves...");
+    printf("You ran out of moves...");
 
     Sleep(3000);
 
@@ -174,18 +213,8 @@ void printBoard(){
         }
     }
     b++;
-    // system("cls");                          
-    // for(row=0; row<num_rows; row++){        
-    //     for(col=0; col<num_cols; col++){
 
-    //         printf("| %c ",board[row][col]);
-    //     }
-    //     printf("|\n");
-    //     for(a=0; a<num_cols; a++) printf("____");
-    //     printf("\n");
-    // }
-
-        system("cls");                          
+    system("cls");                          
     for(row=num_rows-1; row>=0; row--)
     {        
         for(col=0; col<num_cols; col++)
@@ -228,6 +257,12 @@ void history(game games[50]){
   
     printf("\n\nWhich game would you like to review?");
     scanf("%d", &option);
+
+    replayGame(games[option-1]);
+
+}
+
+void replayGame(game curGame){
 
 }
 
@@ -331,3 +366,14 @@ int fourInaRow(char first, char second, char third, char fourth){
         return 0;
 }
 
+/*
+
+    ::::TO DO LIST::::
+    
+- make the undo function.
+- make the redo function.
+- finish the replay game function. 
+- allow the computer to play against you.
+- option to play different game board sizes.
+
+*/
