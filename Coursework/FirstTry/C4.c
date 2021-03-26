@@ -28,8 +28,8 @@ int horizontalCheck();
 int verticalCheck();
 int diagonalCheck();
 void printBoard();
+void clearBoard();
 void takeTurn();
-void pushOrder();
 void findPosition();
 void replayGame(game curGame);
 
@@ -42,16 +42,22 @@ int num_of_games = 0;
 
 int main()
 {
+    char input[10];
     int option;
     int flag =1;
     game games[20];
-
 
     while (flag = 1)
     {
         system("cls");  
         printf("\n1. Start Game \n2. History \n3. Instructions \n4. Exit Game\n");
-        scanf("%d", &option);
+        scanf("%s", input);
+
+        //check if the user input is numeric
+        if (isdigit(atoi(input)) == 0){
+            option=atoi(input);
+        }
+        else option = 6;
 
         switch(option)
         {
@@ -97,18 +103,15 @@ game start(){
     int column;
     int turn = 0;
     int flag2 = 0;
-    int win;
+    int win = 0;
 
     printf("\n      ***Welcome to Connect 4***");
 
     printBoard(board);
 
     for(int i = 0; i < num_cols*num_rows;i++ ){
-        //pushOrder(column);
-
         if (turn%2 == 0){
             while (flag2 == 0){
-
                 printf("\nPlayer1: Which column would you like to play in? (1-5)");
 
                 scanf("%s", &input);
@@ -122,7 +125,7 @@ game start(){
                     // carry out the redo function
                     flag2=1;
                 }
-                else if(column>num_cols || column < 0) {
+                else if(column<=num_cols && column > 0) {
                     flag2=1;
                 }
                 else {
@@ -148,7 +151,7 @@ game start(){
                     // carry out the redo function
                     flag2=1;
                 }
-                else if(column>num_cols || column < 0) {
+                else if(column<=num_cols && column > 0) {
                     flag2=1;
                 }
                 else {
@@ -165,7 +168,7 @@ game start(){
         position[column-1] +=1;
 
         printBoard();
-        win = winCheck();
+        if (turn>6) win = winCheck();
         if (win == 1) 
         {
             //save the game to history and then exit the game back to main menu.
@@ -178,17 +181,7 @@ game start(){
             }
             currentGame.numberOfMoves = turn;
 
-            for (int i = 0; i < 5; i++)
-            {
-                position[i] = 0;
-            }
-
-            for (int i = 0; i < 100; i++)
-            {
-                for (int j = 0; j < 100; j++){
-                    board[i][j] = ' ';
-                }
-            }
+            clearBoard();
 
             printf("DEBUG: \nwinner is: %s", currentGame.winner);
             Sleep(4000);
@@ -201,6 +194,20 @@ game start(){
     Sleep(3000);
 
     return currentGame;
+}
+
+void clearBoard(){
+    for (int i = 0; i < 100; i++)
+    {
+        for (int j = 0; j < 100; j++){
+            board[i][j] = ' ';
+        }
+    }
+
+    for (int i = 0; i < num_cols; i++)
+    {
+        position[i] = 0;
+    }
 }
 
 void printBoard(){
@@ -229,13 +236,6 @@ void printBoard(){
 
     for(a=0; a<num_cols; a++)printf("%*d",4,a+1);
     printf("\n");
-
-    Sleep(3000);
-}
-
-void pushOrder(int column){
-    playOrder[last] = column;
-    last++;
 }
 
 void history(game games[50]){
@@ -264,6 +264,24 @@ void history(game games[50]){
 
 void replayGame(game curGame){
 
+    for (int i = 0; i < curGame.numberOfMoves; i++){
+        if (i%2 == 0){
+            // print X
+            board [position[curGame.moves[i]-1]][curGame.moves[i]-1] ='X';
+        }
+        else{
+            //print O
+            board [position[curGame.moves[i]-1]][curGame.moves[i]-1] ='O';
+        }
+        position[curGame.moves[i]-1] +=1;
+
+        printBoard();
+        Sleep(200);
+    }
+
+    printf("The game replay has concluded");
+    clearBoard();
+    Sleep(6000);
 }
 
 void instructions(){
@@ -272,9 +290,11 @@ void instructions(){
     printf("\nChoose a column to pace your token");
     printf("\nPress U to undo a previous move");
     printf("\nPress R to redo a move");
-    printf("\nTo win you must have 4 tokens in a row");
+    printf("\nTo win you must have 4 tokens in a row"); 
     printf("\nPrevious games can be viewed by pressing '2' in the Main Menu");
     printf("\n\n");
+
+    Sleep(10000);
 }
 
 int winCheck(){
