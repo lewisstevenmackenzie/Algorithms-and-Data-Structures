@@ -10,17 +10,11 @@ typedef struct {
     char winner[10];
     int moves[50];
     int numberOfMoves;
+    int numberOfRows;
+    int numberOfColumns;
 } game;
 
-//stack for order of play
-int playOrder[100], last = -1;
-
-int stack[8], top = -1;
-
-int board_rows = 7;
-int board_columns = 5;
-
-game start();
+game start(int gamemode);
 void instructions();
 void history();
 int winCheck();
@@ -32,25 +26,30 @@ void clearBoard();
 void takeTurn();
 void findPosition();
 void replayGame(game curGame);
+void undoMove(int columnNum);
+void redoMove();
+int chooseGameMode();
+void gameSettings();
 
-int num_cols = 5;
+int num_cols = 7;
 int num_rows = 7;
 int b = 0;
 char board[100][100];
-int position [5] = { 0 };
+int position [100] = { 0 };
 int num_of_games = 0;
 
 int main()
 {
     char input[10];
     int option;
-    int flag =1;
+    int showMenu = 1;
+    int gameMode;
     game games[20];
 
-    while (flag = 1)
+    while (showMenu)
     {
         system("cls");  
-        printf("\n1. Start Game \n2. History \n3. Instructions \n4. Exit Game\n");
+        printf("\n1. Start Game \n2. History \n3. Instructions \n4. Change Game Settings \n5. Exit Game\n");
         scanf("%s", input);
 
         //check if the user input is numeric
@@ -63,7 +62,8 @@ int main()
         {
             case 1:
                 printf("\nYou've chosen to start a new game");
-                game gameCur = start();
+                gameMode = chooseGameMode();
+                game gameCur = start(gameMode);
                 games[num_of_games] = gameCur;
                 num_of_games++;
                 break;
@@ -79,9 +79,15 @@ int main()
                 break;
             
             case 4:
+                printf("\nYou've chosen to change the game environment");
+                gameSettings();
+
+                break;
+
+            case 5:
                 printf("\nYou've chosen to exit the game");
                 printf("\nThanks for playing :)");
-                flag = 0;
+                showMenu = 0;
                 return 0;
 
             default:
@@ -93,25 +99,64 @@ int main()
     return 0;
 }
 
-game start(){
+void gameSettings(){
+    printf("\nHow many rows would you like the game board to be?");
+    scanf("%d", &num_rows);
+    printf("\nHow many columns would you like the game board to be?");
+    scanf("%d", &num_cols);
+}
 
-    int order[50] = {0};
-    int pos = 0;
-    game currentGame={"",NULL,0};
+int chooseGameMode(){
+
+    char input[10];
+    int option;
+
+
+    printf("\n      **Game Mode**");
+    printf("\n1. Player Vs. Player  \n2. Player Vs. Easy AI \n3. Player Vs. Difficult AI");
+    scanf("%s", input);
+
+    //check if the user input is numeric
+    if (isdigit(atoi(input)) == 0){
+        option=atoi(input);
+    }
+    else option = 6;
+
+    switch(option)
+    {
+        case 1: 
+            return 1;
+        break;
+
+        case 2:
+            return 2;
+        break;
+
+        case 3:
+            return 3;
+        break;
+    }
+    return 0;
+}
+
+game start(int gamemode){
+
+    int order[50], last = 0;
+    int redoArray[50], finalRedoElement = 0;
+    game currentGame={"",NULL,0, num_rows, num_cols};
 
     char input[10];
     int column;
-    int turn = 0;
-    int flag2 = 0;
+    int waitngforValidMove = 1;
     int win = 0;
 
     printf("\n      ***Welcome to Connect 4***");
 
     printBoard(board);
 
-    for(int i = 0; i < num_cols*num_rows;i++ ){
-        if (turn%2 == 0){
-            while (flag2 == 0){
+    while(last<num_cols*num_rows){
+        if (last%2 == 0){
+            while (waitngforValidMove){
                 printf("\nPlayer1: Which column would you like to play in? (1-5)");
 
                 scanf("%s", &input);
@@ -119,24 +164,61 @@ game start(){
 
                 if(strcmp(input,"undo") == 0){
                     //carry out the undo function
-                    flag2=1;
+
+                    if (last > 0){
+                    redoArray[finalRedoElement] = order[last-1];
+                    finalRedoElement++;
+
+                    board [position[order[last-1]-1]-1][order[last-1]-1] =' ';
+                    position[order[last-1]-1]--;
+
+                    last--;
+                    waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nYou must first make a move before you undo.");
+                    }
                 }
                 else if (strcmp(input,"redo") == 0){
                     // carry out the redo function
-                    flag2=1;
+
+                    if (finalRedoElement > 0){
+                        finalRedoElement--;
+                        board [position[redoArray[finalRedoElement]-1]][redoArray[finalRedoElement]-1] ='X';
+                    
+                        order[last] = redoArray[finalRedoElement];
+                        position[order[last]-1] +=1;
+                        last++;
+
+                        waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nThere are no more moves to redo.");
+                    }
+
                 }
                 else if(column<=num_cols && column > 0) {
-                    flag2=1;
+                    if (position[column-1] < num_rows){
+                        board [position[column-1]][column-1] ='X';
+                        order[last] = column;
+                        last++;
+                        position[column-1] +=1;
+
+                        waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nThere is no space left in this column. Try another.");
+                    }
+
                 }
                 else {
                     printf("\nPlease enter a valid input:");
                 }
             }
-            flag2 = 0;
-            board [position[column-1]][column-1] ='X';
+            waitngforValidMove = 1;
         }
-        else{
-            while (flag2 == 0){
+        else if (gamemode == 1){
+            while (waitngforValidMove){
 
                 printf("\nPlayer2: Which column would you like to play in? (1-5)");
 
@@ -145,41 +227,87 @@ game start(){
 
                 if(strcmp(input,"undo") == 0){
                     //carry out the undo function
-                    flag2=1;
+
+                    if (last > 0){
+                    redoArray[finalRedoElement] = order[last-1];
+                    finalRedoElement++;
+
+                    board [position[order[last-1]-1]-1][order[last-1]-1] =' ';
+                    position[order[last-1]-1]--;
+
+                    last--;
+                    waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nYou must first make a move before you undo.");
+                    }
+
                 }
                 else if (strcmp(input,"redo") == 0){
                     // carry out the redo function
-                    flag2=1;
+                    if (finalRedoElement > 0){
+                        finalRedoElement--;
+                        board [position[redoArray[finalRedoElement]-1]][redoArray[finalRedoElement]-1] ='O';
+                    
+                        order[last] = redoArray[finalRedoElement];
+                        position[order[last]-1] +=1;
+                        last++;
+
+                        waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nThere are no more moves to redo.");
+                    }
                 }
                 else if(column<=num_cols && column > 0) {
-                    flag2=1;
+                    if (position[column-1] < num_rows){
+                        board [position[column-1]][column-1] ='O';
+                        order[last] = column;
+                        last++;
+                        position[column-1] +=1;
+
+                        waitngforValidMove=0;
+                    }
+                    else{
+                        printf("\nThere is no space left in this column. Try another.");
+                    }
                 }
                 else {
                     printf("\nPlease enter a valid input:");
                 }
             }
-            flag2 = 0;
-            board [position[column-1]][column-1] ='O';
+            waitngforValidMove = 1;
         }
-        order[pos] = column;
-        pos++;
+        else if (gamemode == 2){
+            printf("\nOne day there will be a simple AI implemented.");
 
-        turn++;
-        position[column-1] +=1;
+
+        }
+        else if (gamemode == 3){
+            printf("\nOne day there will be a difficult AI implemented.");
+            break;
+        }
+        else{
+            printf("\n You did not choose a game mode to play.");
+            break;
+        }
+
 
         printBoard();
-        if (turn>6) win = winCheck();
-        if (win == 1) 
+        if (last>6) win = winCheck();
+        if (win) 
         {
             //save the game to history and then exit the game back to main menu.
-            if (turn%2 != 0) strcpy(currentGame.winner,"Player 1");
+            if (last%2 != 0) strcpy(currentGame.winner,"Player 1");
             else strcpy(currentGame.winner,"Player 2");
                                    
             for (int i = 0; i < 50; i++)
             {
                 currentGame.moves[i] = order[i];
             }
-            currentGame.numberOfMoves = turn;
+            currentGame.numberOfMoves = last;
+            currentGame.numberOfRows = num_rows;
+            currentGame.numberOfColumns = num_cols;
 
             clearBoard();
 
@@ -192,8 +320,15 @@ game start(){
     printf("You ran out of moves...");
 
     Sleep(3000);
+    clearBoard();
 
     return currentGame;
+}
+
+void undoMove(int columnNum){
+    printf("\nYou've tried to undo your previous move.");
+
+    Sleep(3000);
 }
 
 void clearBoard(){
@@ -248,7 +383,7 @@ void history(game games[50]){
 
     printf("\nPrevious Matches:\n");
     for (int i = 0; i < num_of_games; i++){ //this will print all the previous matched dates, who won, moves taken.
-        printf("\nWinner: %s \nNumber of moves: %d", games[i].winner, games[i].numberOfMoves);
+        printf("\nWinner: %s \nNumber of moves: %d\nNumber of Rows: %d \nNumber of Columns: %d", games[i].winner, games[i].numberOfMoves, games[i].numberOfRows, games[i].numberOfColumns);
         for (int j = 0; j < games[i].numberOfMoves; j++)
         {
             printf("\n column: %d",games[i].moves[j]);
@@ -263,6 +398,9 @@ void history(game games[50]){
 }
 
 void replayGame(game curGame){
+
+    num_rows = curGame.numberOfRows;
+    num_cols = curGame.numberOfColumns;
 
     for (int i = 0; i < curGame.numberOfMoves; i++){
         if (i%2 == 0){
@@ -389,11 +527,12 @@ int fourInaRow(char first, char second, char third, char fourth){
 /*
 
     ::::TO DO LIST::::
-    
-- make the undo function.
-- make the redo function.
-- finish the replay game function. 
-- allow the computer to play against you.
-- option to play different game board sizes.
+Minimum Requirements:
+    -
+    -
+
+Additional Marks:
+    - allow the computer to play against you.(SEMI-IMPORTANT!)
+    - option to play different game board sizes. (NOT AS IMPORTANT!)
 
 */
